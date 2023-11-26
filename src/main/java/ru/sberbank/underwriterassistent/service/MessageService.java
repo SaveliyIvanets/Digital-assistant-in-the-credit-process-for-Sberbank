@@ -26,17 +26,14 @@ public class MessageService {
     public void saveMessage(int applicationId, MessageDto messageDto) {
         messageRepo.saveMessage(applicationId, messageDto);
         GptRequestDto request = new GptRequestDto(
-                "model_name",
+                "GigaChat:latest",
                 messageDto
         );
         try {
             var response = gptClient.sendMessage(request);
-            var choices = response.choice;
+            var choices = response.choices;
             for (ChoiceDto choice : choices) {
-                if (choice.messages.size() > 0) {
-                    var message = choice.messages.getLast();
-                    messageRepo.saveMessage(applicationId, message);
-                }
+                messageRepo.saveMessage(applicationId, choice.message);
             }
         } catch (IOException e) {
             System.out.println("катастрофа");
